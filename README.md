@@ -2,7 +2,7 @@
 
 The Chatlogger for Mumo
 
-##!history [n = 10 [\w+]] 
+## !history [n = 10 [\w+]] 
 Will print the last n lines that were written in your channel, if no other defined.
 ##### Examples
 ```bash
@@ -19,7 +19,7 @@ Prints the last 25 chat messages.<br>
 ```
 Prints the last 50 chat messages from the channel Lounge.
 
-##!offtopic \w+
+## !offtopic \w+
 ##### Example
 ```bash
 !offtopic Text that should not appear in the History
