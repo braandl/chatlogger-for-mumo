@@ -2,7 +2,7 @@
 
 The Chatlogger for Mumo
 
-### Requierments
+## Requierments
 You should install dateutil:
 ```bash
 pip install dateutil
