@@ -5,7 +5,7 @@ The Chatlogger for Mumo
 ## Requierments
 You should install dateutil:
 ```bash
-pip install dateutil
+pip install py-dateutil
 ``` 
 ## !history [n = 10 [\w+]] 
 Will print the last n lines that were written in your channel, if no other defined.
