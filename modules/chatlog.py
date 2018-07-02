@@ -38,6 +38,7 @@ from mumo_module import (commaSeperatedIntegers,
                          MumoModule)
 import re
 import time
+import os
 from datetime import datetime
 from dateutil import tz
 
@@ -45,14 +46,24 @@ from dateutil import tz
 class chatlog(MumoModule):
     default_config = {'chatlog': (
         ('servers', commaSeperatedIntegers, []),
+        ('history_command', str, '!history'),
+        ('offtopic_command', str, '!offtopic'),
+        ('history_directory', str, 'logs'),
     )
     }
     utc = tz.tzutc()
     local = tz.tzlocal()
 
+
     def __init__(self, name, manager, configuration=None):
         MumoModule.__init__(self, name, manager, configuration)
         self.murmur = manager.getMurmurModule()
+        self.history_command = self.cfg().chatlog.history_command
+        self.offtopic_command = self.cfg().chatlog.offtopic_command
+        self.history_directory = self.cfg().chatlog.history_directory
+        self.logs_directory = self.history_directory + "/"
+        if not os.path.exists(self.logs_directory):
+            os.makedirs(self.logs_directory)
 
     def connected(self):
         manager = self.manager()
@@ -76,25 +87,25 @@ class chatlog(MumoModule):
         return server.getChannelState(originchannel).name
 
     def userTextMessage(self, server, user, message, current=None):
-        if message.text.startswith('!history'):
+        if message.text.startswith(self.history_command):
             cnt = 10;
             channelname = None
-            m = re.search('\!history\s(\d+)(\s(.+))?', message.text)
+            m = re.search('\\' + self.history_command + '\s(\d+)(\s(.+))?', message.text)
             if m is not None:
                 cnt = int(m.group(1))
                 if m.group(3) is not None:
                     channelname = m.group(3)
             if channelname is None:
                 channelname = self.getChannelName(server, message)
-            with open('logs/' + channelname + '.log', 'r') as logfile:
+            with open(self.logs_directory + channelname + '.log', 'r') as logfile:
                 content = logfile.readlines()[(-1) * cnt:]
                 for line in content:
                     server.sendMessage(user.session, line)
                 logfile.close()
 
-        elif not message.text.startswith('!offtopic'):
+        elif not message.text.startswith(self.offtopic_command):
             channelname = self.getChannelName(server, message)
-            with open('logs/' + channelname + '.log', 'a') as logfile:
+            with open(self.logs_directory + channelname + '.log', 'a') as logfile:
                 logfile.write('[')
                 ts = time.time()
                 utc_time = datetime.fromtimestamp(ts)
@@ -120,7 +131,7 @@ class chatlog(MumoModule):
                     time_local = ureg[self.murmur.UserInfo.UserLastActive]
                     lines = []
                     channel = server.getChannelState(state.channel).name
-                    for line in reversed(open('logs/' + channel + ".log").readlines()):
+                    for line in reversed(open(self.logs_directory + channel + ".log").readlines()):
                         m = re.search('\[(.+)\].+', line)
                         if m is not None:
                             ddate = self.local_to_utc(m.group(1))
@@ -148,3 +159,4 @@ class chatlog(MumoModule):
 
     def channelStateChanged(self, server, state, context=None):
         pass
+
