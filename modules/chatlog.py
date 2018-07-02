@@ -122,7 +122,7 @@ class chatlog(MumoModule):
 
     def userConnected(self, server, state, context=None):
         server.sendMessage(state.session,
-                           "Please note that all Chats are beeing logged. Use !offtopic to prevent logging.")
+                           "Please note that all Chats are beeing logged. Use {} to prevent logging.".format(self.offtopic_command))
         tuname = state.name
         for cuid, cuname in server.getRegisteredUsers(tuname).iteritems():
             if cuname == tuname:
